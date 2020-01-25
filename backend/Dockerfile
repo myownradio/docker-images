@@ -1,59 +1,108 @@
-FROM debian:jessie-backports
+FROM ubuntu:18.04
 
 MAINTAINER Roman Lakhtadyr <roman.lakhtadyr@gmail.com>
 
-ENV DEBIAN_FRONTEND=noninteractive
-ENV PHP_VERSION=7.1
-ENV PHP_ENV=production
-ENV MAX_UPLOAD_FILESIZE=100
+ENV DEBIAN_FRONTEND         noninteractive
+ENV MAX_UPLOAD_FILESIZE     256
+ENV PORT                    8080
+ENV PHP_VERSION             7.2
+ENV NODE_VERSION            10
 
-# Install utilities
+# Install container dependencies
 RUN apt-get update && \
-    apt-get install -y curl apt-transport-https git && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get install -y --no-install-recommends --no-install-suggests \
+        curl \
+        apt-transport-https \
+        ca-certificates \
+        && \
+    (curl -sL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash) && \
+    apt-get install -y --no-install-recommends --no-install-suggests \
+        nginx \
+        php${PHP_VERSION} \
+        php${PHP_VERSION}-fpm \
+        php${PHP_VERSION}-dom \
+        php${PHP_VERSION}-curl \
+        php${PHP_VERSION}-mbstring \
+        php${PHP_VERSION}-xml \
+        php${PHP_VERSION}-zip \
+        composer \
+        supervisor \
+        nodejs \
+        ffmpeg \
+        mediainfo \
+        && \
+    apt-get clean
 
-# Install node.js, npm, web server and media applications
-RUN (curl -sL https://deb.nodesource.com/setup_8.x | bash) && \
-    apt-get install -y ffmpeg mediainfo nodejs nginx supervisor && \
-    rm -rf /var/lib/apt/lists/*
+# Create configuration files
+# supervisor
+RUN mkdir -p /etc/supervisor/conf.d/ && echo '\
+[supervisord]\n\
+nodaemon=true\n\
+logfile=/dev/null\n\
+logfile_maxbytes=0\n\
+\n\
+[program:nginx]\n\
+command=/usr/sbin/nginx -g "daemon off; error_log /dev/stderr;"\n\
+stdout_logfile=/dev/fd/1\n\
+stdout_logfile_maxbytes=0\n\
+stderr_logfile=/dev/fd/2\n\
+stderr_logfile_maxbytes=0\n\
+\n\
+[program:fpm]\n\
+command=/usr/sbin/php-fpm'${PHP_VERSION}' -F\n\
+stdout_logfile=/dev/fd/1\n\
+stdout_logfile_maxbytes=0\n\
+stderr_logfile=/dev/fd/2\n\
+stderr_logfile_maxbytes=0\n\
+' > /etc/supervisor/conf.d/services.conf
 
-# Install php and composer
-RUN (curl -sL https://packages.sury.org/php/apt.gpg | apt-key add -) && \
-    (echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list) && \
-    apt-get update && \
-    apt-get install -y \
-        php$PHP_VERSION-fpm \
-        php$PHP_VERSION-cli \
-        php$PHP_VERSION-mbstring \
-        php$PHP_VERSION-mysql \
-        php$PHP_VERSION-xml \
-        php$PHP_VERSION-gd \
-        php$PHP_VERSION-mcrypt \
-        php$PHP_VERSION-curl \
-        php$PHP_VERSION-zip && \
-    rm -rf /var/lib/apt/lists/* && \
+# nginx
+RUN echo '\
+server {\n\
+    listen       '${PORT}';\n\
+    server_name  localhost default;\n\
+    root         /usr/app/public;\n\
+    access_log   /dev/stderr combined;\n\
+    client_max_body_size '${MAX_UPLOAD_FILESIZE}';\n\
+    location / {\n\
+        index            index.html index.htm index.php;\n\
+        try_files        $uri $uri/ @rewrites;\n\
+        error_page 403 = @rewrites;\n\
+        error_page 404 = @rewrites;\n\
+        error_page 405 = @rewrites;\n\
+    }\n\
+    location ~ \.php$ {\n\
+        fastcgi_pass     unix:/run/php/php'${PHP_VERSION}'-fpm.sock;\n\
+        fastcgi_index    index.php;\n\
+        fastcgi_param    SCRIPT_FILENAME  $document_root$fastcgi_script_name;\n\
+        include          fastcgi_params;\n\
+        error_page 404 = @rewrites;\n\
+        error_page 405 = @rewrites;\n\
+    }\n\
+    location @rewrites {\n\
+        rewrite ^/(.*)$ /index.php;\n\
+    }\n\
+    location ~ /\.ht {\n\
+        deny  all;\n\
+    }\n\
+}\n\
+' > /etc/nginx/sites-available/default
 
-    mkdir -p /var/run/php && \
+RUN mkdir -p /run/php
 
-    (curl -sL https://getcomposer.org/installer | php -- --install-dir=bin --filename=composer) 
-
-# Patch configuration files
+# Patch PHP configuration files
 RUN sed -i "s/^upload_max_filesize\s=.*/upload_max_filesize = ${MAX_UPLOAD_FILESIZE}M/" /etc/php/$PHP_VERSION/fpm/php.ini && \
     sed -i "s/^post_max_size\s=.*/post_max_size = ${MAX_UPLOAD_FILESIZE}M/" /etc/php/$PHP_VERSION/fpm/php.ini && \
     sed -i 's/^variables_order\s=.*/variables_order = "EGPCS"/' /etc/php/$PHP_VERSION/fpm/php.ini && \
-    sed -i "/^;clear_env/s/^;//" /etc/php/$PHP_VERSION/fpm/pool.d/www.conf && \
-    echo "client_max_body_size ${MAX_UPLOAD_FILESIZE}m;" > /etc/nginx/conf.d/nginx-upload.conf
+    sed -i "s/^error_log\s=.*/error_log = \/proc\/self\/fd\/2\n/" /etc/php/$PHP_VERSION/fpm/php-fpm.conf && \
+    echo "catch_workers_output = on" >> /etc/php/$PHP_VERSION/fpm/pool.d/www.conf && \
+    echo "php_admin_flag[log_errors] = on" >> /etc/php/$PHP_VERSION/fpm/pool.d/www.conf
 
-# Copy configuration files
-COPY ./supervisord.conf /etc/supervisor/supervisord.conf
-COPY ./nginx-fpm.conf /etc/nginx/sites-available/nginx-fpm.conf
-
-# Configure nginx
-RUN rm -f /etc/nginx/sites-enabled/* && \
-    ln -s /etc/nginx/sites-available/nginx-fpm.conf /etc/nginx/sites-enabled/nginx-fpm.conf
-
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
+RUN mkdir -p /usr/app/public && echo '<?php phpinf();' > /usr/app/public/index.php
 
 VOLUME /tmp
+VOLUME /var/tmp
 
-EXPOSE 80
+EXPOSE $PORT
+
+CMD ["/usr/bin/supervisord"]
