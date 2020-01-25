@@ -98,6 +98,7 @@ RUN sed -i "s/^upload_max_filesize\s=.*/upload_max_filesize = ${MAX_UPLOAD_FILES
     sed -i "s/^post_max_size\s=.*/post_max_size = ${MAX_UPLOAD_FILESIZE}M/" /etc/php/$PHP_VERSION/fpm/php.ini && \
     sed -i 's/^variables_order\s=.*/variables_order = "EGPCS"/' /etc/php/$PHP_VERSION/fpm/php.ini && \
     sed -i "s/^error_log\s=.*/error_log = \/proc\/self\/fd\/2\n/" /etc/php/$PHP_VERSION/fpm/php-fpm.conf && \
+    sed -i "/^;clear_env/s/^;//" /etc/php/$PHP_VERSION/fpm/pool.d/www.conf && \
     echo "catch_workers_output = on" >> /etc/php/$PHP_VERSION/fpm/pool.d/www.conf && \
     echo "php_admin_flag[log_errors] = on" >> /etc/php/$PHP_VERSION/fpm/pool.d/www.conf
 
