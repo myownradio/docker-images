@@ -26,6 +26,7 @@ RUN apt-get update && \
         php${PHP_VERSION}-mbstring \
         php${PHP_VERSION}-xml \
         php${PHP_VERSION}-zip \
+        php${PHP_VERSION}-mysql \
         composer \
         supervisor \
         nodejs \
