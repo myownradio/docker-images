@@ -31,7 +31,8 @@ RUN apt-get update && \
         ffmpeg \
         mediainfo \
         && \
-    apt-get clean
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Create configuration files
 # supervisor
@@ -98,11 +99,9 @@ RUN sed -i "s/^upload_max_filesize\s=.*/upload_max_filesize = ${MAX_UPLOAD_FILES
     echo "catch_workers_output = on" >> /etc/php/$PHP_VERSION/fpm/pool.d/www.conf && \
     echo "php_admin_flag[log_errors] = on" >> /etc/php/$PHP_VERSION/fpm/pool.d/www.conf
 
-RUN mkdir -p /usr/app/public && echo '<?php phpinf();' > /usr/app/public/index.php
+RUN mkdir -p /usr/app/public && echo '<?php phpinfo();\n' > /usr/app/public/index.php
 
 VOLUME /tmp
 VOLUME /var/tmp
-
-EXPOSE $PORT
 
 CMD ["/usr/bin/supervisord"]
