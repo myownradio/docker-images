@@ -12,6 +12,7 @@ ENV NODE_VERSION            10
 RUN apt-get update && \
     apt-get install -y --no-install-recommends --no-install-suggests \
         curl \
+        git \
         apt-transport-https \
         ca-certificates \
         && \
