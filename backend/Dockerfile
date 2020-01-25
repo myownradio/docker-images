@@ -4,7 +4,6 @@ MAINTAINER Roman Lakhtadyr <roman.lakhtadyr@gmail.com>
 
 ENV DEBIAN_FRONTEND         noninteractive
 ENV MAX_UPLOAD_FILESIZE     256
-ENV PORT                    8080
 ENV PHP_VERSION             7.2
 ENV NODE_VERSION            10
 
@@ -62,7 +61,7 @@ stderr_logfile_maxbytes=0\n\
 # nginx
 RUN echo '\
 server {\n\
-    listen       '${PORT}';\n\
+    listen       8080;\n\
     server_name  localhost default;\n\
     root         /usr/app/public;\n\
     access_log   /dev/stderr combined;\n\
@@ -108,3 +107,5 @@ VOLUME /tmp
 VOLUME /var/tmp
 
 CMD ["/usr/bin/supervisord"]
+
+EXPOSE 8080
