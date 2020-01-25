@@ -1,2 +1,2 @@
 # runtime-images
-Runtime images used by MyOwnRadio services.
+Docker images used by myownradio services.
