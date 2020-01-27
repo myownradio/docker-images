@@ -7,5 +7,8 @@ build: check-env
 push: check-env
 	docker push $(IMAGE_NAME):$(IMAGE_TAG)
 
+inspect:
+	docker run -it --rm -p 8080:8080 $(IMAGE_NAME):$(IMAGE_TAG)
+
 check-env:
 	@test -n "$(SERVICE)" || (echo SERVICE is undefined && exit 1)
