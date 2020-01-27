@@ -65,7 +65,7 @@ server {\n\
     server_name  localhost default;\n\
     root         /usr/app/public;\n\
     access_log   /dev/stderr combined;\n\
-    client_max_body_size '${MAX_UPLOAD_FILESIZE}';\n\
+    client_max_body_size '${MAX_UPLOAD_FILESIZE}'M;\n\
     location / {\n\
         index            index.html index.htm index.php;\n\
         try_files        $uri $uri/ @rewrites;\n\
