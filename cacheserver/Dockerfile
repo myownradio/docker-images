@@ -14,7 +14,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 ARG UPSTREAM_HOST=https://s3.eu-central-1.amazonaws.com
-ARG CACHE_EXPIRE_MINUTES=1
+ARG CACHE_EXPIRE_MINUTES=60
 ARG MAX_UPLOAD_FILESIZE=256
 
 
@@ -38,7 +38,7 @@ stderr_logfile_maxbytes=0\n\
 RUN echo '\
 proxy_cache_methods GET HEAD;\n\
 proxy_cache_path /var/cache/nginx/one levels=1:2 keys_zone=one:10m\n\
-                            max_size=10g\n\
+                            max_size=10g inactive='${CACHE_EXPIRE_MINUTES}'m\n\
                             use_temp_path=off;\n\
 server {\n\
     listen       8080;\n\
@@ -48,7 +48,7 @@ server {\n\
         add_header X-Cache-Status $upstream_cache_status;\n\
         proxy_pass '${UPSTREAM_HOST}';\n\
         proxy_cache one;\n\
-        proxy_cache_valid 200 1m;\n\
+        proxy_cache_valid 200 '${CACHE_EXPIRE_MINUTES}'m;\n\
     }\n\
 }\n\
 ' > /etc/nginx/sites-available/default
