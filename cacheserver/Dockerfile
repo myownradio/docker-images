@@ -47,7 +47,6 @@ server {\n\
     location / {\n\
         add_header X-Cache-Status $upstream_cache_status;\n\
         proxy_pass '${UPSTREAM_HOST}';\n\
-        proxy_read_timeout 5m;\n\
         proxy_cache one;\n\
         proxy_cache_valid 200 '${CACHE_EXPIRE_MINUTES}'m;\n\
     }\n\
