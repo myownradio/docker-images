@@ -4,7 +4,7 @@ MAINTAINER Roman Lakhtadyr <roman.lakhtadyr@gmail.com>
 
 ENV DEBIAN_FRONTEND         noninteractive
 ENV MAX_UPLOAD_FILESIZE     256
-ENV PHP_VERSION             7.3
+ENV PHP_VERSION             7.4
 ENV NODE_VERSION            12
 
 # Install container dependencies
