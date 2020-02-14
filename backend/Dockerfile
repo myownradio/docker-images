@@ -4,17 +4,20 @@ MAINTAINER Roman Lakhtadyr <roman.lakhtadyr@gmail.com>
 
 ENV DEBIAN_FRONTEND         noninteractive
 ENV MAX_UPLOAD_FILESIZE     256
-ENV PHP_VERSION             7.2
-ENV NODE_VERSION            10
+ENV PHP_VERSION             7.3
+ENV NODE_VERSION            12
 
 # Install container dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends --no-install-suggests \
+        gpg-agent \
+        software-properties-common \
         curl \
         git \
         apt-transport-https \
         ca-certificates \
         && \
+    (add-apt-repository ppa:ondrej/php) && \
     (curl -sL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash) && \
     apt-get install -y --no-install-recommends --no-install-suggests \
         nginx \
