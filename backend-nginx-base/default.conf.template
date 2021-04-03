@@ -19,7 +19,7 @@ server {
 
     location = /index.php {
        fastcgi_param  ENVIRONMENT "production";
-       fastcgi_pass   php-fpm:9000;
+       fastcgi_pass   ${PHP_FPM_HOSTNAME}:9000;
        fastcgi_param  SCRIPT_FILENAME /code/public/$fastcgi_script_name;
        include        fastcgi_params;
        send_timeout   3600s;
