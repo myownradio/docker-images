@@ -15,7 +15,7 @@ RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" && \
     sed -i "s/^variables_order\s=.*/variables_order = \"EGPCS\"/" $PHP_INI_DIR/php.ini && \
     sed -i "s/^post_max_size\s=.*/post_max_size = ${MAX_UPLOAD_FILESIZE}M/" $PHP_INI_DIR/php.ini
 
-COPY --from=mwader/static-ffmpeg:4.3.2 /ffmpeg /usr/local/bin/
-COPY --from=mwader/static-ffmpeg:4.3.2 /ffprobe /usr/local/bin/
+COPY --from=pldin601/static-ffmpeg:4.3.2 /ffmpeg /usr/local/bin/
+COPY --from=pldin601/static-ffmpeg:4.3.2 /ffprobe /usr/local/bin/
 
 USER nobody:nogroup
