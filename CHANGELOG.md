@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## file-server-1.0.2
+* Change status endpoint `/nginx_status` to `/stub_status` and expose it on `8080` port
+
 ## file-server-1.0.1
 * Expose `/nginx_status` endpoint
 
