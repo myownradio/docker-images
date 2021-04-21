@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## file-server-1.0.1
+* Expose `/nginx_status` endpoint
+
 ## file-server-1.0.0
 * Set `send_timeout` to `3600s`
 
