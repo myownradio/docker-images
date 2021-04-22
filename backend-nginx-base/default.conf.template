@@ -1,6 +1,7 @@
 server {
-    listen 8080 default_server;
-    server_name localhost default;
+    listen 80;
+    server_name localhost;
+
     root /code/public;
     index index.php;
 
