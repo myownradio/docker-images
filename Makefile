@@ -4,7 +4,7 @@ IMAGE_TAG := $(shell ([ -r ${VERSION_FILE} ] && (cat ${VERSION_FILE} | sed 's/[[
 PORT := 8080
 
 build: check-env
-	docker build -t $(IMAGE_NAME):$(IMAGE_TAG) ./$(SERVICE)
+	docker buildx build --platform linux/amd64,linux/arm64 -t $(IMAGE_NAME):$(IMAGE_TAG) --push ./$(SERVICE)
 
 push: check-env
 	docker tag $(IMAGE_NAME):$(IMAGE_TAG) $(IMAGE_NAME):latest
