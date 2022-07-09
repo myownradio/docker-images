@@ -12,7 +12,7 @@ push: check-env
 	docker push $(IMAGE_NAME):latest
 
 inspect:
-	docker run -it --rm -p {PORT}:8080 $(IMAGE_NAME):$(IMAGE_TAG)
+	docker run -it --rm -p ${PORT}:8080 $(IMAGE_NAME):$(IMAGE_TAG) sh
 
 check-env:
 	@test -n "$(SERVICE)" || (echo SERVICE is undefined && exit 1)

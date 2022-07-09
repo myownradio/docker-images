@@ -1,13 +1,14 @@
-FROM php:7.4-fpm-alpine
+FROM php:8.1-fpm-alpine
 
 MAINTAINER Roman Lakhtadyr <roman.lakhtadyr@gmail.com>
 
 ARG MAX_UPLOAD_FILESIZE=256
 ENV MAX_UPLOAD_FILESIZE=${MAX_UPLOAD_FILESIZE}
 
-RUN apk add curl-dev libpng-dev oniguruma-dev
+RUN apk add curl-dev libpng-dev oniguruma-dev jpeg-dev freetype-dev
 
-RUN docker-php-ext-install curl fileinfo json iconv gd pdo pdo_mysql mbstring
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+	&& docker-php-ext-install -j$(nproc) gd pdo_mysql
 
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" && \
     rm "$PHP_INI_DIR/php.ini-development" && \
