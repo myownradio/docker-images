@@ -17,7 +17,7 @@ RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" && \
     sed -i "s/^post_max_size\s=.*/post_max_size = ${MAX_UPLOAD_FILESIZE}M/" $PHP_INI_DIR/php.ini
 
 COPY --from=composer:1.10.21 /usr/bin/composer /usr/local/bin/
-COPY --from=pldin601/static-ffmpeg:4.3.2 /ffmpeg /usr/local/bin/
-COPY --from=pldin601/static-ffmpeg:4.3.2 /ffprobe /usr/local/bin/
+COPY --from=mwader/static-ffmpeg:5.0.1-3 /ffmpeg /usr/local/bin/
+COPY --from=mwader/static-ffmpeg:5.0.1-3 /ffprobe /usr/local/bin/
 
 USER nobody:nogroup
