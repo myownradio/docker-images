@@ -1,4 +1,4 @@
-FROM php:8.1-fpm-alpine
+FROM php:7.4-fpm-alpine
 
 MAINTAINER Roman Lakhtadyr <roman.lakhtadyr@gmail.com>
 
