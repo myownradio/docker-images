@@ -16,6 +16,10 @@ RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" && \
     sed -i "s/^variables_order\s=.*/variables_order = \"EGPCS\"/" $PHP_INI_DIR/php.ini && \
     sed -i "s/^post_max_size\s=.*/post_max_size = ${MAX_UPLOAD_FILESIZE}M/" $PHP_INI_DIR/php.ini
 
+# Setup PHP-FPM config settings
+RUN echo 'pm.max_children = 32' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
+    echo 'pm.max_requests = 500' >> /usr/local/etc/php-fpm.d/zz-docker.conf
+
 COPY --from=composer:1.10.21 /usr/bin/composer /usr/local/bin/
 COPY --from=mwader/static-ffmpeg:5.0.1-3 /ffmpeg /usr/local/bin/
 COPY --from=mwader/static-ffmpeg:5.0.1-3 /ffprobe /usr/local/bin/
